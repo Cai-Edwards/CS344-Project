@@ -3,6 +3,14 @@ from itertools import product, permutations, repeat
 from multiprocessing import Pool, freeze_support
 from tqdm import tqdm
 import csv
+import argparse
+from os import path
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-n', help='maximum value of N to calculate', required=True)
+parser.add_argument('-p', help='Size of pattern to avoid', required=True)
+parser.add_argument('-f', '--file', help='btree.exe file', default='./btree.exe')
+
 
 def count(n, p, e):
     avoiding = []
@@ -93,8 +101,15 @@ def check(N, n):
         for x in semi_sequences:
             for k in inps[x[-1]]:
                 writer.writerow(k.split(',') + x)
-        
 
 if __name__ == "__main__":
+
+    args = parser.parse_args()
+
+    target_exe = args.file
+
+    if not path.isfile(target_exe):
+        raise FileNotFoundError('btree.exe could not be found')
+
     freeze_support()
-    check(12, 5)
+    check(int(args.n), int(args.p))
