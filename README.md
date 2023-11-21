@@ -42,6 +42,7 @@ Developed using Python 3.10.7
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+```sh
 generate_table.py [-h] -n N -p P [-f FILE] [-q] [-k PROCESSORS]
 
 options:
@@ -52,5 +53,5 @@ options:
   -q, --quiet           Mute commandline output of program
   -k PROCESSORS, --processors PROCESSORS
                         Number of processors to use
-
+```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
