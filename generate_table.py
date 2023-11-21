@@ -13,7 +13,7 @@ class AvoidingTree:
     def __init__(self, args) -> None:
         """init. Pass in args as dict."""
 
-        self.file, self.n, self.p, self.q, self.preorders, self.all_edges, self.only_mixed, self.only_semi = [None]*8
+        self.file, self.n, self.p, self.quiet, self.preorders, self.all_edges, self.only_mixed, self.only_semi = [None]*8
 
         self.setattrs(args)
 
@@ -107,14 +107,14 @@ class AvoidingTree:
             returns list of all unique sequences found, and all p,e which match a given sequence
         """
 
-        if n is None: 
+        if n is None:
             n = self.n
 
         already_found = []
         unique_sequences = []
         seq_to_pattern = {}
         
-        for p in tqdm(list(preorders), disable=self.q):
+        for p in tqdm(list(preorders), disable=self.quiet):
             vals = process.map(self.count_star, zip(repeat(n), repeat(p), edgesets))
 
             for x, i in vals:
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', help='maximum value of N to calculate', required=True, type=int)
     parser.add_argument('-p', help='Size of pattern to avoid', required=True, type=int)
-    parser.add_argument('-f', '--file', help='btree.exe file', default='./btree.exe')
+    parser.add_argument('-f', '--file', help='btree.exe file - default=./btree.exe', default='./btree.exe')
     parser.add_argument('-q', '--quiet', help="Mute commandline output of program", action='store_true')
     parser.add_argument('-k', '--processors', help="Number of processors to use", type=int, default=1)
 
@@ -195,18 +195,21 @@ if __name__ == "__main__":
 
     generator = AvoidingTree(vars(args))
 
-    if generator.q:
-        logFormatter = logging.Formatter("%(asctime)s:  %(message)s")
-        rootLogger = logging.getLogger()
 
-        fileHandler = logging.FileHandler("table.log")
-        fileHandler.setFormatter(logFormatter)
-        rootLogger.addHandler(fileHandler)
+    logFormatter = logging.Formatter("%(asctime)s:  %(message)s")
+    rootLogger = logging.getLogger()
 
+    fileHandler = logging.FileHandler("table.log")
+    fileHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(fileHandler)
+
+    rootLogger.setLevel(logging.DEBUG)
+
+    if not generator.quiet:
         consoleHandler = logging.StreamHandler(stdout)
         consoleHandler.setFormatter(logFormatter)
         rootLogger.addHandler(consoleHandler)
-        rootLogger.setLevel(logging.DEBUG)
+        
 
     target_exe = generator.file
 
