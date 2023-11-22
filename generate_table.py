@@ -83,8 +83,9 @@ class AvoidingTree:
         all_edges = ["".join([str(x) for x in k]) for k in [x for x in list(product([0,1,2],repeat=n-2))]]
         only_mixed = ["".join([str(x) for x in k]) for k in [x for x in list(product([0,1],repeat=n-2))]]
         
-        self.all_edges = [x+"0" for x in all_edges]
-        self.only_mixed = [x+"0" for x in only_mixed]
+        #Fix this later - needs to remove leaf nodes after splitting mixed and semi
+        self.all_edges = [x+"1" for x in all_edges]
+        self.only_mixed = [x+"1" for x in only_mixed]
         self.only_semi = [x for x in self.all_edges if x not in self.only_mixed]
 
         return (self.preorders, self.all_edges, self.only_mixed, self.only_semi)
@@ -159,6 +160,50 @@ class AvoidingTree:
                 if x[-1] in diff:
                     logging.debug(x)
                     logging.debug(s_p[x[-1]])
+            
+            total_seq = m_p
+            for seq, pat in s_p.items():
+                if m_p[seq]:
+                    total_seq[seq] += pat
+                else:
+                    total_seq[seq] = pat
+
+            cols = "|l|l|" + "*{" + str(self.n) + "}{r}|"
+            table = r"\begin{longtable}[H]{" + cols + "}\n" \
+                     + r"\hline" + "\n" \
+                     + r"P & e & \multicolumn{" + str(self.n) + r"}{l|}{Counts} \\ \hline" + "\n"
+
+
+            pre = {}
+            seq_lookup = {s[-1]:s for s in (m_sequences + s_sequences)}
+
+            for seq, pat in total_seq.items():
+
+                for k in pat:
+                    order, edge = k.split(",")
+                    
+                    if order not in pre:
+                        pre[order] = []
+
+                    #TEMP METHODS FOR EQUIV TODO
+                    pre[order].append((edge[:-1] + "-", " & ".join(str(s) for s in seq_lookup[seq])))
+
+            for order, edges in pre.items():
+                first = True
+
+                for r in edges:
+                    if first:
+                        table += order + " & " + r[0] + " & " + r[1]
+                        first = False
+                    else:
+                        table += r"\\*" + "\n" + " & " + r[0] + " & " + r[1]
+            
+                table += r" \\" + "\n"+ r"\hline" + "\n"
+            
+            table += r"\end{longtable}"
+            print(table)
+                
+
 
 def mirrored(preorder):
     """Returns the mirrored preorder based on the reordering n+1-i"""

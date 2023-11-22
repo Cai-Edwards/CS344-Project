@@ -49,7 +49,7 @@ options:
   -h, --help            show this help message and exit
   -n N                  maximum value of N to calculate
   -p P                  Size of pattern to avoid
-  -f FILE, --file FILE  btree.exe file
+  -f FILE, --file FILE  btree.exe file, default is ./btree.exe
   -q, --quiet           Mute commandline output of program
   -k PROCESSORS, --processors PROCESSORS
                         Number of processors to use
