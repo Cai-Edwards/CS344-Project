@@ -163,7 +163,7 @@ class AvoidingTree:
             
             total_seq = m_p
             for seq, pat in s_p.items():
-                if m_p[seq]:
+                if seq in m_p:
                     total_seq[seq] += pat
                 else:
                     total_seq[seq] = pat
@@ -201,7 +201,10 @@ class AvoidingTree:
                 table += r" \\" + "\n"+ r"\hline" + "\n"
             
             table += r"\end{longtable}"
-            print(table)
+
+            with open("temp.txt", "w") as f:
+                f.write(table)
+            #print(table)
                 
 
 
@@ -226,6 +229,137 @@ def avoid231(preorder):
             return False
     
     return True
+
+def get_leaf(preorder):
+
+    if len(preorder) == 0:
+        return []
+    elif len(preorder) == 1:
+        print(preorder)
+        return preorder
+
+    root = int(preorder[0])
+
+    left = [x for i, x in enumerate(preorder[1:]) if int(x) < root]
+    right = [x for i, x in enumerate(preorder[1:]) if int(x) > root]
+
+    leaf = []
+    leaf += get_leaf(left)
+    leaf += get_leaf(right)
+
+    return leaf
+
+def BpL(pre, edge, i):
+    res = []
+    
+    for j in range(i+1,len(pre)):
+
+        if int(pre[j]) == int(pre[j-1]) - 1 and (int(edge[j-1]) == 1 or int(edge[j-1]) == 2):
+            res.append(j)
+        else:
+            break
+    
+    return res
+
+def BpR(pre, edge, i):
+    res = []
+    
+    for j in range(i+1,len(pre)):
+
+        if int(pre[j]) == int(pre[j-1]) + 1 and (int(edge[j-1]) == 1 or int(edge[j-1]) == 2):
+            res.append(j)
+        else:
+            break
+    
+    return res
+
+def AL(pre, edge, i):
+    res = []
+
+    if pre[i] < pre[i-1]:
+        res.append(i-1)
+    else:
+        return []
+
+    j = i-1
+    while j > 0:
+        if (int(pre[j]) == int(pre[j-1]) - 1) and (int(edge[j-1]) == 1 or int(edge[j-1]) == 2):
+            res.append(j-1)
+        else:
+            break
+        j-=1
+
+    return res
+
+
+def AR(pre, edge, i):
+    res = []
+
+    if pre[i] > pre[i-1]:
+        res.append(i-1)
+    else:
+        return []
+
+    j = i-1
+    while j > 0:
+        if (int(pre[j]) == int(pre[j-1]) + 1) and (int(edge[j-1]) == 1 or int(edge[j-1]) == 2):
+            res.append(j-1)
+        else:
+            break
+        j-=1
+
+    #if int(pre[res[-1]]) == int(pre[0]) + 1: #Actually does this hold?
+        #res.append(0)
+
+    return res
+
+
+def elbowR(pre, edge):
+
+    res = []
+    for i in range(1,len(pre)-1):
+
+        bL = BpL(pre, edge, i) #Ensures no vertex has a right child
+        ar = AR(pre, edge, i) #Ensures no vertex has a left child
+
+        #print(f"i: {i}\nbL:{bL}\nar:{ar}\n ") 
+
+        if (len(bL) >= 1 and #cL(i) exists.
+            len(ar) >= 1 and #i=cR(p(i))
+            (len(ar) == 1 or len(bL) == 1) and #One of the branches is trivial
+            (int(ar[-1]) == 0 or int(edge[ar[-1]-1]) == 0) #The top node is either the root or a non-contig edge
+        ):
+            res.append(i)
+    
+    return res
+
+def elbowL(pre, edge):
+    
+    res = []
+    for i in range(1,len(pre)-1):
+
+        bR = BpR(pre, edge, i) #Ensures no vertex has a left child
+        al = AL(pre, edge, i) #Ensures no vertex has a right child
+
+        #print(f"i: {i}\nbL:{bR}\nar:{al}\n ") 
+
+        if (len(bR) >= 1 and #cR(i) exists.
+            len(al) >= 1 and #i=cL(p(i))
+            (len(al) == 1 or len(bR) == 1) and #One of the branches is trivial
+            (int(al[-1]) == 0 or int(edge[al[-1]-1]) == 0) #The top node is either the root or a non-contig edge
+        ):
+            res.append(i)
+    
+    return res
+
+def elbow(pre, edge):
+    a = elbowL(pre, edge) + elbowR(pre, edge)
+
+    for k in a:
+        edge = list(edge)
+        edge[k-1] = "-"
+    
+    return edge
 
 if __name__ == "__main__":
 
